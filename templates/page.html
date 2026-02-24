@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Digital Diary</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Georgia', serif;
+            min-height: 100%;
+            margin: 0;
+            padding: 20px;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        .diary-container {
+            max-width: 70%;
+            margin: 0 auto;
+            background: #fefefe;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .diary-header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .diary-date {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .diary-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .mic-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #e74c3c;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .mic-button:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .mic-button.recording {
+            animation: pulse 1s infinite;
+            background: #27ae60;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 6px 25px rgba(39, 174, 96, 0.6);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+            }
+        }
+
+        .diary-content {
+            padding: 40px;
+            background: #fefefe;
+            position: relative;
+            min-height: 500px;
+        }
+
+        .lined-paper {
+            background-image:
+                linear-gradient(to right, #3498db 40px, transparent 40px),
+                repeating-linear-gradient(
+                    transparent,
+                    transparent 29px,
+                    #ecf0f1 29px,
+                    #ecf0f1 31px
+                );
+            background-size: 100% 31px;
+            line-height: 31px;
+            padding-left: 60px;
+            padding-top: 10px;
+        }
+
+        .diary-textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: 'Georgia', serif;
+            font-size: 1.1rem;
+            color: #333;
+            resize: none;
+            min-height: 400px;
+            line-height: 31px;
+            padding: 0;
+        }
+
+        .diary-textarea::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .recording-indicator {
+            position: absolute;
+            top: 90px;
+            left: 30px;
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .recording-indicator.show {
+            opacity: 1;
+        }
+
+        .diary-footer {
+            background: #f8f9fa;
+            padding: 15px 40px;
+            border-top: 1px solid #e9ecef;
+            text-align: right;
+            color: #666;
+            font-style: italic;
+        }
+
+        .word-count {
+            font-size: 0.9rem;
+        }
+
+        .floating-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 15px 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 1000;
+            animation: slideUp 0.6s ease-out;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .nav-btn {
+            background: transparent;
+            border: none;
+            border-radius: 15px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+            color: #2c3e50;
+            min-width: 70px;
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 15px;
+            z-index: -1;
+        }
+
+        .nav-btn:hover::before {
+            opacity: 1;
+        }
+
+        .nav-btn:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .nav-btn i {
+            font-size: 1.4rem;
+            margin-bottom: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-btn.profile-nav {
+            color: #3498db;
+        }
+
+        .nav-btn.profile-nav::before {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+
+        .nav-btn.insight-nav {
+            color: #9b59b6;
+        }
+
+        .nav-btn.insight-nav::before {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        }
+
+        .nav-btn.logout-nav {
+            color: #e74c3c;
+        }
+
+        .nav-btn.logout-nav::before {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .nav-btn.suggestion-nav {
+            color: #f39c12;
+        }
+
+        .nav-btn.suggestion-nav::before {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+        }
+
+        .nav-btn.chatbot-nav {
+            color: #1abc9c;
+        }
+
+        .nav-btn.chatbot-nav::before {
+            background: linear-gradient(45deg, #1abc9c, #16a085);
+        }
+
+        .nav-btn:hover i {
+            transform: scale(1.1);
+        }
+        .floating-nav {
+                bottom: 15px;
+                width:68%;
+                margin: 0 auto;
+                left: 15px;
+                right: 15px;
+                transform: none;
+                padding: 12px 15px;
+            }
+
+            .nav-buttons {
+                gap: 8px;
+                justify-content: space-between;
+            }
+
+            .nav-btn {
+                min-width: 60px;
+                padding: 10px 8px;
+                gap: 3px;
+            }
+
+            .nav-btn i {
+                font-size: 1.2rem;
+            }
+
+            .nav-btn span {
+                font-size: 0.65rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-btn span {
+                display: none;
+            }
+
+            .nav-btn {
+                min-width: 50px;
+                padding: 12px 8px;
+            }
+
+            .nav-btn i {
+                font-size: 1.3rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="diary-container">
+            <div class="diary-header">
+                <button class="mic-button" id="micButton" title="Click to start/stop recording">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <div class="recording-indicator" id="recordingIndicator">
+                    <i class="fas fa-circle"></i> Recording...
+                </div>
+                <div class="diary-date" id="currentDate"></div>
+                <div id="userid" style="display:none;">{{uid}}</div>
+                <h1 class="diary-title">My Diary</h1>
+            </div>
+
+            <div class="diary-content lined-paper">
+                <textarea
+                    class="diary-textarea"
+                    id="diaryText"
+                    placeholder="Dear Diary,
+
+Today was..."
+                    spellcheck="true"
+                ></textarea>
+            </div>
+
+            <div class="diary-footer">
+                <div class="word-count">
+                    Words: <span id="wordCount">0</span> | Characters: <span id="charCount">0</span>
+                </div>
+            </div>
+        </div>
+        <!-- Floating Navigation -->
+          <div class="floating-nav">
+               <div class="nav-buttons">
+                   <button class="nav-btn profile-nav" onclick="goToProfile()"> <i class="fas fa-user"></i> <span>Profile</span> </button>
+                   <button class="nav-btn insight-nav" onclick="goToInsights()"> <i class="fas fa-chart-line"></i> <span>Insights</span> </button>
+                   <button class="nav-btn suggestion-nav" onclick="goToSuggestions()"> <i class="fas fa-lightbulb"></i> <span>Suggest</span> </button>
+                   <button class="nav-btn chatbot-nav" onclick="goToChatbot()"> <i class="fas fa-robot"></i> <span>Chatbot</span> </button>
+                   <button class="nav-btn logout-nav" onclick="logout()"> <i class="fas fa-sign-out-alt"></i> <span>Logout</span> </button>
+               </div>
+          </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function logout(){
+            window.location.href = '/page';
+        }
+
+        function goToInsights(){
+            window.location.href = '/insights';
+        }
+
+        function goToProfile(){
+            window.location.href = '/profile';
+        }
+        function goToSuggestions(){
+            window.location.href = '/suggestions';
+        }
+
+
+        // Set current date
+        function setCurrentDate() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+       let isRecording = false;
+        const micButton = document.getElementById('micButton');
+        const recordingIndicator = document.getElementById('recordingIndicator');
+        const resultElement = document.getElementById('diaryText');
+
+        // Initialize speech recognition once
+        const recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        // Handle results (only defined once)
+        recognition.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + '\n';
+                }
+            }
+            if (finalTranscript.trim()) {
+                resultElement.textContent += finalTranscript;
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+        };
+
+        // Toggle mic recording
+        micButton.addEventListener('click', function () {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert('Your browser does not support Speech Recognition API. Use Chrome.');
+                return;
+            }
+
+            isRecording = !isRecording;
+
+            if (isRecording) {
+                micButton.classList.add('recording');
+                recordingIndicator.classList.add('show');
+                micButton.innerHTML = '<i class="fas fa-stop"></i>';
+                micButton.title = 'Click to stop recording';
+                recognition.start();
+                console.log('Speech recognition started');
+            } else {
+                micButton.classList.remove('recording');
+                recordingIndicator.classList.remove('show');
+                micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+                micButton.title = 'Click to start recording';
+                recognition.stop();
+                console.log('Speech recognition stopped');
+            }
+        });
+
+
+        // Word and character counter
+        const diaryText = document.getElementById('diaryText');
+        const wordCount = document.getElementById('wordCount');
+        const charCount = document.getElementById('charCount');
+
+        function updateCounts() {
+            const text = diaryText.value;
+            const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            const chars = text.length;
+
+            wordCount.textContent = words;
+            charCount.textContent = chars;
+        }
+
+        diaryText.addEventListener('input', updateCounts);
+
+        // Auto-save functionality (saves to localStorage)
+        function autoSave() {
+            const content = diaryText.value;
+            const date = new Date().toDateString();
+            localStorage.setItem(`diary_${date}`, content);
+        }
+
+        // Load saved content for today
+        function loadSavedContent() {
+            const date = new Date().toDateString();
+            const savedContent = localStorage.getItem(`diary_${date}`);
+            if (savedContent) {
+                diaryText.value = savedContent;
+                updateCounts();
+            }
+        }
+
+        // Auto-save every 30 seconds
+        setInterval(autoSave, 30000);
+
+        // Save on page unload
+        window.addEventListener('beforeunload', autoSave);
+
+        // Initialize the page
+        setCurrentDate();
+        loadSavedContent();
+        updateCounts();
+
+        // Focus on textarea when page loads
+        window.addEventListener('load', function() {
+            diaryText.focus();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98bcc66616af3d1e',t:'MTc2MDAwMTM0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
